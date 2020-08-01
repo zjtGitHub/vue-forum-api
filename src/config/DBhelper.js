@@ -4,7 +4,7 @@ import config from './index'
 mongoose.connect(config.DB_URL, {
   useNewUrlParser: true,
   useUnifiedTopology: true
-});
+})
 
 mongoose.connection.on('connected', () => {
   console.log('连接成功')
