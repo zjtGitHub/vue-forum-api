@@ -98,13 +98,13 @@ class LoginController {
       const user1 = await User.findOne({ username: body.username })
       console.log(user1)
       if (user1 !== null && typeof user1.username !== 'undefined') {
-        msg.username = ['此邮箱已经注册，可以通过邮箱找回密码']
+        msg.username = '此邮箱已经注册，可以通过邮箱找回密码'
         check = false
       }
-      const user2 = await User.findOne({ nickname: body.nickname })
+      const user2 = await User.findOne({ name: body.nickname })
       // 查库，看name是否被注册
-      if (user2 !== null && typeof user2.nickname !== 'undefined') {
-        msg.nickname = ['此昵称已经被注册，请修改']
+      if (user2 !== null && typeof user2.name !== 'undefined') {
+        msg.name = '此昵称已经被注册，请修改'
         check = false
       }
       // 写入数据到数据库
@@ -112,9 +112,9 @@ class LoginController {
         body.password = await bcrypt.hash(body.password, 5)
         const user = new User({
           username: body.username,
-          nickname: body.nickname,
-          password: body.password,
-          created: moment().format('YYYY-MM-DD HH:mm:ss')
+          name: body.nickname,
+          password: body.password
+          // created: moment().format('YYYY-MM-DD HH:mm:ss')
         })
         const result = await user.save()
         ctx.body = {
