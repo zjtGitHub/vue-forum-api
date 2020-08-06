@@ -40,6 +40,25 @@ PostSchema.statics = {
         path: 'uid',
         select: 'username isVip pic'
       })
+  },
+
+  /**
+   * 获取本周热议
+   * @param {Object} options 筛选条件
+   * @param {String} sort 排序方式
+   * @param {Number} page 分页页数
+   * @param {Number} limit 分页条数
+   */
+  getTopWeek: function (options, sort, page, limit) {
+    return this.find({
+      created: {
+        $gte: moment().subtract(7, 'days')
+      }
+    }, {
+      answer: 1,
+      title: 1
+    }).sort({ answer: -1 })
+      .limit(15)
   }
 }
 
