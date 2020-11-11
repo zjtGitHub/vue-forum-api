@@ -31,7 +31,6 @@ UserSchema.pre('update', function (next) {
 })
 
 UserSchema.post('save', function (error, doc, next) {
-  console.log(error.name, 666)
   if (error.name === 'MongoError' && error.code === 11000) {
     next(new Error('Error: Mongoose has a duplicate key.'))
   } else {
@@ -46,6 +45,10 @@ UserSchema.statics = {
       username: 0,
       mobile: 0
     })
+  },
+  findByName: function (name) {
+    console.log(name)
+    return this.findOne({ username: name })
   }
 }
 

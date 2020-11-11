@@ -49,7 +49,7 @@ class LoginController {
     if (result) {
       // 验证用户账号密码是否正确
       let checkUserPasswd = false
-      const user = await User.findOne({ username: body.username })
+      const user = await User.findByName(body.username)
       if (await bcrypt.compare(body.password, user.password)) {
         checkUserPasswd = true
       }
@@ -61,7 +61,8 @@ class LoginController {
         })
         ctx.body = {
           code: 200,
-          token: token
+          token: token,
+          data: user
         }
       } else {
         // 用户名 密码验证失败，返回提示
