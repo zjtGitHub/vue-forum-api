@@ -56,7 +56,13 @@ class LoginController {
       // mongoDB查库
       if (checkUserPasswd) {
         // 验证通过，返回Token数据
-        const token = jsonwebtoken.sign({ _id: 'zjt' }, config.JWT_SECRET, {
+        // 筛选返回数据，不返回password等敏感数据
+        const userObj = user.toJSON()
+        const arr = ['password', 'username', 'roles']
+        arr.map((item) => {
+          delete userObj[item]
+        })
+        const token = jsonwebtoken.sign({ _id: userObj._id }, config.JWT_SECRET, {
           expiresIn: '1d'
         })
         ctx.body = {
