@@ -8,7 +8,7 @@ const UserSchema = new Schema({
   name: { type: String },
   created: { type: Date },
   updated: { type: Date },
-  favs: { type: Number, default: 100 },
+  favs: { type: Number, default: 100 }, // 用户积分
   gender: { type: String, default: '' },
   roles: { type: Array, default: ['user'] },
   pic: { type: String, default: '/img/avatar.jpg' },
@@ -17,7 +17,7 @@ const UserSchema = new Schema({
   regmark: { type: String, default: '' },
   location: { type: String, default: '' },
   isVip: { type: String, default: '0' },
-  count: { type: Number, default: 0 }
+  count: { type: Number, default: 0 } // 签到天数
 })
 
 UserSchema.pre('save', function (next) {
