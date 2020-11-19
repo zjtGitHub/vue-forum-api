@@ -17,8 +17,6 @@ class UserController {
     const obj = await getJWTPayload(ctx.header.authorization)
     // 从sign_record表中查询用户上一次签到记录
     const record = await SignRecord.findByUid(obj._id)
-    console.log(obj._id, 111)
-    console.log(record, 222)
     const user = await User.findByID(obj._id)
     let result = {}
     let newRecord = {}
