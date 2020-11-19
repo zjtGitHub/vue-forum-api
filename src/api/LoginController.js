@@ -5,6 +5,7 @@ import jsonwebtoken from 'jsonwebtoken'
 import config from '../config'
 import { checkCode } from '../common/Utils'
 import User from '../model/User'
+import SignRecord from '../model/SignRecord'
 
 class LoginController {
   /**
@@ -65,10 +66,22 @@ class LoginController {
         const token = jsonwebtoken.sign({ _id: userObj._id }, config.JWT_SECRET, {
           expiresIn: '1d'
         })
+        // 查询签到记录，返回isSign字段
+        const res = await SignRecord.findByUid(userObj._id)
+        if (res !== null) {
+          // 判断当天是否签到
+          if (moment(res.created).format('YYYY-MM-DD') === moment().format('YYYY-MM-DD')) {
+            userObj.isSign = true
+          } else {
+            userObj.isSign = false
+          }
+        } else {
+          userObj.isSign = false
+        }
         ctx.body = {
           code: 200,
           token: token,
-          data: user
+          data: userObj
         }
       } else {
         // 用户名 密码验证失败，返回提示
