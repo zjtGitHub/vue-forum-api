@@ -75,6 +75,7 @@ class LoginController {
           } else {
             userObj.isSign = false
           }
+          userObj.lastSign = res.created
         } else {
           userObj.isSign = false
         }
