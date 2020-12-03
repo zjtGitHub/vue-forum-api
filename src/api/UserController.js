@@ -109,6 +109,33 @@ class UserController {
       lastSign: newRecord.created
     }
   }
+
+  // 修改用户信息接口
+  async updateUserInfo (ctx) {
+    const { body } = ctx.request
+    const obj = await getJWTPayload(ctx.header.authorization)
+    const user = await User.findOne({ _id: obj._id })
+    if (body.username && body.username !== user.username) {
+      // 用户修改了邮箱，发送邮件通知
+    } else {
+      const arr = ['username', 'password', 'mobile']
+      arr.map(item => {
+        delete body[item]
+      })
+      const result = await User.update({ _id: obj._id }, body)
+      if (result.n === 1 && result.ok === 1) {
+        ctx.body = {
+          code: 200,
+          msg: '更新成功'
+        }
+      } else {
+        ctx.body = {
+          code: 500,
+          msg: '更新失败'
+        }
+      }
+    }
+  }
 }
 
 export default new UserController()
