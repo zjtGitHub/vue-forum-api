@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer'
+import config from '@/config'
 
 // async..await is not allowed in global scope, must use a wrapper
 async function send (sendInfo) {
@@ -16,13 +17,15 @@ async function send (sendInfo) {
       pass: 'sgyamwqnsausbbeb' // generated ethereal password
     }
   })
-  const url = 'https://www.baidu.com'
+  const baseUrl = config.baseUrl
+  const route = sendInfo.type === 'email' ? 'email' : 'reset'
+  const url = `${baseUrl}/${route}?key=${sendInfo.key}`
   // send mail with defined transport object
   const info = await transporter.sendMail({
     from: '"认证邮件" <947140669@qq.com>', // sender address
     to: sendInfo.email, // list of receivers
     subject:
-            sendInfo.user !== ''
+            sendInfo.user !== '' || sendInfo.type !== 'email'
               ? `你好开发者，${sendInfo.user}！《慕课网前端全栈实践》注册码`
               : '《慕课网前端全栈实践》注册码', // Subject line
     text: `您在《慕课网前端全栈实践》课程中注册，您的邀请码是${

@@ -1,7 +1,12 @@
 import SignRecord from '../model/SignRecord'
 import { getJWTPayload } from '../common/Utils'
 import User from '../model/User'
+import send from '../config/MailConfig'
+import { v4 as uuid } from 'uuid'
+import config from '@/config'
+import jwt from 'jsonwebtoken'
 import * as moment from 'moment'
+import { setValue } from '@/config/RedisConfig'
 
 class UserController {
   /**
@@ -116,7 +121,24 @@ class UserController {
     const obj = await getJWTPayload(ctx.header.authorization)
     const user = await User.findOne({ _id: obj._id })
     if (body.username && body.username !== user.username) {
+      const key = uuid()
+      setValue(key, jwt.sign({ _id: obj._id }, config.JWT_SECRET, { expiresIn: '30m' }))
       // 用户修改了邮箱，发送邮件通知
+      const result = await send({
+        type: 'email',
+        key: key,
+        code: '',
+        expire: moment()
+          .add(30, 'minutes')
+          .format('YYYY-MM-DD HH:mm:ss'),
+        email: user.username,
+        user: user.name
+      })
+      ctx.body = {
+        code: 200,
+        data: result,
+        msg: '邮件发送成功，请点击链接修改邮箱'
+      }
     } else {
       const arr = ['username', 'password', 'mobile']
       arr.map(item => {
