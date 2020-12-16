@@ -6,7 +6,7 @@ import { v4 as uuid } from 'uuid'
 import config from '@/config'
 import jwt from 'jsonwebtoken'
 import * as moment from 'moment'
-import { setValue } from '@/config/RedisConfig'
+import { setValue, getValue } from '@/config/RedisConfig'
 
 class UserController {
   /**
@@ -120,13 +120,26 @@ class UserController {
     const { body } = ctx.request
     const obj = await getJWTPayload(ctx.header.authorization)
     const user = await User.findOne({ _id: obj._id })
+    let msg = ''
     if (body.username && body.username !== user.username) {
       const key = uuid()
       setValue(key, jwt.sign({ _id: obj._id }, config.JWT_SECRET, { expiresIn: '30m' }))
       // 用户修改了邮箱，发送邮件通知
+      // 判断用户的新邮箱是否有人注册
+      const tmpUser = await User.findOne({ username: body.username })
+      if (tmpUser && tmpUser.password) {
+        ctx.body = {
+          code: 501,
+          msg: '邮箱已注册'
+        }
+        return
+      }
       const result = await send({
         type: 'email',
-        key: key,
+        data: {
+          key: key,
+          username: body.username
+        },
         code: '',
         expire: moment()
           .add(30, 'minutes')
@@ -136,25 +149,42 @@ class UserController {
       })
       ctx.body = {
         code: 200,
-        data: result,
-        msg: '邮件发送成功，请点击链接修改邮箱'
+        data: result
+      }
+      msg = '更新基本资料成功，账号修改需要邮件确认，请查收邮件！'
+    }
+    const arr = ['username', 'password', 'mobile']
+    arr.map(item => {
+      delete body[item]
+    })
+    const result = await User.updateOne({ _id: obj._id }, body)
+    if (result.n === 1 && result.ok === 1) {
+      ctx.body = {
+        code: 200,
+        msg: msg === '' ? '更新成功' : msg
       }
     } else {
-      const arr = ['username', 'password', 'mobile']
-      arr.map(item => {
-        delete body[item]
+      ctx.body = {
+        code: 500,
+        msg: '更新失败'
+      }
+    }
+  }
+
+  // 确认修改用户邮箱
+  async updateUsername (ctx) {
+    const body = ctx.query
+    console.log(body)
+    if (body.key) {
+      const token = await getValue(body.key)
+      console.log(token)
+      const obj = getJWTPayload('Bearer ' + token)
+      await User.updateOne({ _id: obj._id }, {
+        username: body.username
       })
-      const result = await User.update({ _id: obj._id }, body)
-      if (result.n === 1 && result.ok === 1) {
-        ctx.body = {
-          code: 200,
-          msg: '更新成功'
-        }
-      } else {
-        ctx.body = {
-          code: 500,
-          msg: '更新失败'
-        }
+      ctx.body = {
+        code: 200,
+        msg: '更新用户名成功'
       }
     }
   }

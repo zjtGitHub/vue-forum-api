@@ -1,5 +1,6 @@
 import nodemailer from 'nodemailer'
 import config from '@/config'
+import qs from 'qs'
 
 // async..await is not allowed in global scope, must use a wrapper
 async function send (sendInfo) {
@@ -18,8 +19,8 @@ async function send (sendInfo) {
     }
   })
   const baseUrl = config.baseUrl
-  const route = sendInfo.type === 'email' ? 'email' : 'reset'
-  const url = `${baseUrl}/${route}?key=${sendInfo.key}`
+  const route = sendInfo.type === 'email' ? 'confirm' : 'reset'
+  const url = `${baseUrl}/#/${route}?` + qs.stringify(sendInfo.data)
   // send mail with defined transport object
   const info = await transporter.sendMail({
     from: '"认证邮件" <947140669@qq.com>', // sender address

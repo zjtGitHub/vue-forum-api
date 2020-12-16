@@ -8,7 +8,6 @@ const modules = moduleFiles.keys().reduce((items, path) => {
   items.push(value.default)
   return items
 }, [])
-console.log(modules)
 
 export default combineRoutes(
   modules
