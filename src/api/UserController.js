@@ -171,13 +171,28 @@ class UserController {
     }
   }
 
+  // 获取用户信息接口
+  async getUserInfo (ctx) {
+    const obj = await getJWTPayload(ctx.header.authorization)
+    const user = await User.findOne({ _id: obj._id })
+
+    ctx.body = {
+      code: 200,
+      data: {
+        username: user.username,
+        name: user.name,
+        gender: user.gender,
+        location: user.location,
+        regmark: user.regmark
+      }
+    }
+  }
+
   // 确认修改用户邮箱
   async updateUsername (ctx) {
     const body = ctx.query
-    console.log(body)
     if (body.key) {
       const token = await getValue(body.key)
-      console.log(token)
       const obj = getJWTPayload('Bearer ' + token)
       await User.updateOne({ _id: obj._id }, {
         username: body.username

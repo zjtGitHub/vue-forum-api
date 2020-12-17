@@ -1,6 +1,9 @@
 import Post from '../model/Post'
 import Link from '../model/Link'
-
+import fs from 'fs'
+import { v4 as uuid } from 'uuid'
+import moment from 'moment'
+import config from 'config'
 class ContentController {
   /**
    * 文章列表接口
@@ -93,6 +96,18 @@ class ContentController {
       data: result,
       msg: 'success'
     }
+  }
+
+  // 上传图片
+  async uploadImg (ctx) {
+    console.log(ctx.request.files)
+    const file = ctx.request.files.file
+    // 图片名称 图片格式 存储位置 返回前台可以读取的路径
+    const ext = file.name.split('.').pop()
+    const dir = `${config.uploadPath}\\${moment().format('YYYYMMDD')}`
+    // 判断文件夹是否存在 不存在则创建
+    console.log(ext)
+    console.log(dir)
   }
 }
 

@@ -15,6 +15,8 @@ const checkCode = async (key, value) => {
   }
 }
 
+// 文件工具类 判断文件夹是否存在
+
 export {
   checkCode,
   getJWTPayload

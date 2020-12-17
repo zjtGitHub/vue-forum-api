@@ -24,7 +24,16 @@ const jwt = JWT({ secret: config.JWT_SECRET })
  * 使用koa-compose 集成中间件
  */
 const middleware = compose([
-  koaBody(),
+  koaBody({
+    multipart: true,
+    formidable: {
+      keepExtensions: true,
+      maxFieldsSize: 5 * 1024 * 1024
+    },
+    onError: err => {
+      console.log('koabody err', err)
+    }
+  }),
   statics(path.join(__dirname, '../public')),
   cors(),
   jsonUtil({ pretty: false, param: 'pretty' }),
@@ -32,7 +41,6 @@ const middleware = compose([
   errorHandle,
   jwt
 ])
-
 if (!isDevMode) {
   app.use(compress())
 }
