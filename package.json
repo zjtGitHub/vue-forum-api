@@ -29,6 +29,7 @@
     "koa-jwt": "^4.0.0",
     "koa-router": "^9.1.0",
     "koa-static": "^5.0.0",
+    "make-dir": "^3.1.0",
     "moment": "^2.27.0",
     "mongoose": "^5.9.27",
     "nodemailer": "^6.4.11",

@@ -7,7 +7,7 @@ import config from '@/config'
 import jwt from 'jsonwebtoken'
 import * as moment from 'moment'
 import { setValue, getValue } from '@/config/RedisConfig'
-
+import bcrypt from 'bcrypt'
 class UserController {
   /**
    * 签到接口
@@ -200,6 +200,29 @@ class UserController {
       ctx.body = {
         code: 200,
         msg: '更新用户名成功'
+      }
+    }
+  }
+
+  // 修改密码接口
+  async updatePassword (ctx) {
+    const { body } = ctx.request
+    const obj = await getJWTPayload(ctx.header.authorization)
+    const user = await User.findOne({ _id: obj._id })
+    if (await bcrypt.compare(body.oldpwd, user.password)) {
+      const newpwd = await bcrypt.hash(body.newpwd, 5)
+      await User.updateOne(
+        { _id: obj._id },
+        { $set: { password: newpwd } }
+      )
+      ctx.body = {
+        code: 200,
+        msg: '更新密码成功！'
+      }
+    } else {
+      ctx.body = {
+        code: 500,
+        msg: '更新密码失败，请重试！'
       }
     }
   }
