@@ -10,12 +10,12 @@ const PostSchema = new Schema({
   created: { type: Date },
   catalog: { type: String },
   fav: { type: String },
-  isEnd: { type: String, default: '0' },
+  isEnd: { type: Number, default: 0 },
   reads: { type: Number, default: 0 },
   answer: { type: Number, default: 0 },
   status: { type: String, default: '0' },
-  isTop: { type: String, default: '0' },
-  sort: { type: String, default: 100 },
+  isTop: { type: Number, default: 0 },
+  sort: { type: Number, default: 100 },
   tags: {
     type: Array,
     default: {

@@ -62,6 +62,28 @@ class ContentController {
     }
   }
 
+  // 文章详情接口
+  async getPostDetail (ctx) {
+    const id = ctx.query.tid
+    if (id !== 'undefined' && id !== '') {
+      const result = await Post.findOne({ _id: id }).populate({
+        path: 'uid',
+        select: 'name isVip pic'
+      })
+      console.log(result)
+      ctx.body = {
+        code: 200,
+        data: result,
+        msg: 'success'
+      }
+    } else {
+      ctx.body = {
+        code: 404,
+        msg: '帖子不存在'
+      }
+    }
+  }
+
   /**
    * 查询友链
    * @param {*} ctx
