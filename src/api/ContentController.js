@@ -4,8 +4,7 @@ import fs from 'fs'
 import { v4 as uuid } from 'uuid'
 import moment from 'moment'
 import config from 'config'
-import { getJWTPayload } from '../common/Utils'
-import { checkCode } from '@/common/Utils'
+import { getJWTPayload, checkCode, rename } from '../common/Utils'
 import User from '@/model/User'
 // import { dirExists } from '@/common/Utils'
 import mkdir from 'make-dir'
@@ -70,10 +69,10 @@ class ContentController {
         path: 'uid',
         select: 'name isVip pic'
       })
-      console.log(result)
+      const obj = rename(result.toJSON(), 'uid', 'user')
       ctx.body = {
         code: 200,
-        data: result,
+        data: obj,
         msg: 'success'
       }
     } else {
@@ -90,7 +89,6 @@ class ContentController {
    */
   async getLinks (ctx) {
     const result = await Link.find({ type: 'link' })
-    console.log(result)
     ctx.body = {
       code: 200,
       data: result,
@@ -104,7 +102,6 @@ class ContentController {
    */
   async getTips (ctx) {
     const result = await Link.find({ type: 'tip' })
-    console.log(result)
     ctx.body = {
       code: 200,
       data: result,
@@ -144,7 +141,7 @@ class ContentController {
     const filePath = `/${moment().format('YYYYMMDD')}/${picname}.${ext}`
 
     // 方法一
-    reader.pipe(upStream)
+    await reader.pipe(upStream)
     // 方法二
     // let totalLength = 0
     // reader.on('data', function (chunk) {

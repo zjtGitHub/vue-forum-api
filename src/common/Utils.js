@@ -57,9 +57,19 @@ const dirExists = async (dir) => {
   }
 }
 
+// 重命名方法
+const rename = (obj, key, newkey) => {
+  if (Object.keys(obj).indexOf(key) !== -1) {
+    obj[newkey] = obj[key]
+    delete obj[key]
+  }
+  return obj
+}
+
 export {
   checkCode,
   getJWTPayload,
   getStats,
-  dirExists
+  dirExists,
+  rename
 }
