@@ -52,7 +52,6 @@ class ContentController {
     if (typeof body.tag !== 'undefined' && body.tag !== '') {
       options.tags = { $elemMatch: { name: body.tag } }
     }
-    console.log(options)
     const result = await Post.getList(options, sort, page, limit)
     ctx.body = {
       code: 200,
