@@ -26,11 +26,18 @@ CommentsSchema.statics = {
   findByTid: function (id) {
     return this.findByTid({ tid: id })
   },
-  // getCommentsList: function (id, page, limit) {
-  //   return this.find({})
-  // },
   getCommentsList: function (id, page, limit) {
-    return this.find({})
+    return this.find({ tid: id }).populate({
+      path: 'cuid',
+      select: 'name pic isVip',
+      match: { status: { $eq: '0' } }
+    }).populate({
+      path: 'tid',
+      select: 'title status'
+    }).skip(page * limit).limit(limit)
+  },
+  queryCount: function (id) {
+    return this.find({ tid: id }).countDocuments()
   }
 }
 
