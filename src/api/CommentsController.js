@@ -8,11 +8,12 @@ class CommentsController {
     const page = params.page ? params.page : 0
     const limit = params.limit ? parseInt(params.limit) : 10
     const result = await Comment.getCommentsList(tid, page, limit)
-
+    const total = await Comment.queryCount(tid)
     ctx.body = {
       code: 200,
       msg: '查询成功',
-      data: result
+      data: result,
+      total: total
     }
   }
 }
