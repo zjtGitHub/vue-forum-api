@@ -8,9 +8,9 @@ class PublicController {
       size: 4,
       ignoreChars: '0oli1O',
       color: true,
-      noise: Math.floor(Math.random() * 5),
+      noise: Math.floor(Math.random() * 1),
       width: 150,
-      height: 38
+      height: 45
     })
     // 保存图片验证码
     // 设置超时时间10分钟
