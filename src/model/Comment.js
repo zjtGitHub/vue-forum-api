@@ -1,11 +1,11 @@
 import mongoose from '@/config/DBhelper'
-
+import moment from 'moment'
 const Schema = mongoose.Schema
 
 const CommentsSchema = new Schema({
-  tid: { type: String, ref: 'post' },
-  uid: { type: String, ref: 'users' }, // 文章作者ID
-  cuid: { type: String, ref: 'users' }, // 评论用户的ID
+  tid: { type: String, ref: 'post' }, // 关联文章id
+  uid: { type: String, ref: 'users' }, // 关联文章作者ID
+  cuid: { type: String, ref: 'users' }, // 关联评论用户的ID
   content: { type: String },
   created: { type: Date },
   hands: { type: Number, default: 0 },
@@ -14,6 +14,11 @@ const CommentsSchema = new Schema({
   isBest: { type: String, default: '0' }
 })
 
+// 每次保存时设置created时间
+CommentsSchema.pre('save', function (next) {
+  this.created = moment().format('YYYY-MM-DD HH:mm:ss')
+  next()
+})
 CommentsSchema.post('save', function (error, doc, next) {
   if (error.name === 'MongoError' && error.code === 11000) {
     next(new Error('There was a duplicate key error'))
@@ -23,8 +28,13 @@ CommentsSchema.post('save', function (error, doc, next) {
 })
 
 CommentsSchema.statics = {
+  // 查找某个帖子中的所有评论
   findByTid: function (id) {
     return this.findByTid({ tid: id })
+  },
+  // 查找单条评论
+  findByCid: function (id) {
+    return this.findOne({ _id: id })
   },
   getCommentsList: function (id, page, limit) {
     return this.find({ tid: id }).populate({
