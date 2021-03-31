@@ -10,7 +10,7 @@ class PublicController {
       color: true,
       noise: Math.floor(Math.random() * 1),
       width: 150,
-      height: 45
+      height: 60
     })
     // 保存图片验证码
     // 设置超时时间10分钟

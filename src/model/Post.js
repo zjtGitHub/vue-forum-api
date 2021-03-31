@@ -14,7 +14,7 @@ const PostSchema = new Schema({
   reads: { type: Number, default: 0 },
   answer: { type: Number, default: 0 },
   status: { type: String, default: '0' },
-  isTop: { type: Number, default: 0 },
+  isTop: { type: String, default: '0' },
   sort: { type: Number, default: 100 },
   tags: {
     type: Array,
