@@ -11,4 +11,6 @@ router.post('/reply', CommentsController.addComment)
 router.post('/update', CommentsController.editComment)
 // 采纳评论
 router.get('/accept', CommentsController.setBest)
+// 点赞
+router.get('/setHands', CommentsController.setHands)
 export default router
