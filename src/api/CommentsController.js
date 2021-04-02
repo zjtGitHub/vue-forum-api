@@ -11,11 +11,14 @@ class CommentsController {
     const page = params.page ? params.page : 0
     const limit = params.limit ? parseInt(params.limit) : 10
     let result = await Comment.getCommentsList(tid, page, limit)
-    const obj = await getJWTPayload(ctx.header.authorization)
-    result = result.map(item => {
-      return item.toJSON()
-    })
-    if (typeof obj !== 'undefined') {
+    // 添加handed字段，判断当前用户是否给此条评论点赞
+    let obj = {}
+    if (typeof ctx.header.authorization !== 'undefined') {
+      obj = await getJWTPayload(ctx.header.authorization)
+    }
+
+    if (typeof obj._id !== 'undefined') {
+      result = result.map(item => item.toJSON())
       for (let i = 0; i < result.length; i++) {
         const item = result[i]
         item.handed = '0'
@@ -47,10 +50,18 @@ class CommentsController {
       const obj = await getJWTPayload(ctx.header.authorization)
       newComment.cuid = obj._id
       const comment = await newComment.save()
-      ctx.body = {
-        code: 200,
-        msg: 'success',
-        data: comment
+      const res = await Post.updateOne({ _id: body.tid }, { $inc: { answer: 1 } })
+      if (res.ok === 1 && comment._id) {
+        ctx.body = {
+          code: 200,
+          msg: 'success',
+          data: comment
+        }
+      } else {
+        ctx.body = {
+          code: 500,
+          msg: 'failed'
+        }
       }
     } else {
       // 图片验证码失败

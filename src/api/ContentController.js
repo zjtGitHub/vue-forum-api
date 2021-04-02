@@ -69,10 +69,13 @@ class ContentController {
         select: 'name isVip pic'
       })
       const obj = rename(result.toJSON(), 'uid', 'user')
-      ctx.body = {
-        code: 200,
-        data: obj,
-        msg: 'success'
+      const res = await Post.updateOne({ _id: id }, { $inc: { reads: 1 } })
+      if (res.ok === 1 && obj._id) {
+        ctx.body = {
+          code: 200,
+          data: obj,
+          msg: 'success'
+        }
       }
     } else {
       ctx.body = {
