@@ -82,7 +82,6 @@ class ContentController {
           uid: obj._id,
           tid: params.tid
         })
-        console.log(userCollect, 987978)
         if (userCollect && userCollect.tid) {
           isFav = 1
         }
@@ -237,11 +236,8 @@ class ContentController {
       const obj = await getJWTPayload(ctx.header.authorization)
       const post = await Post.findOne({ _id: body.tid })
       // 判断是否是楼主 是否结贴
-      console.log(post, 555)
-      console.log(obj._id, 666)
       if (obj._id === post.uid && !post.isEnd) {
         const result = await Post.updateOne({ _id: body.tid }, body)
-        console.log(result, 888)
         if (result.ok === 1) {
           ctx.body = {
             code: 200,
