@@ -1,5 +1,6 @@
 import Post from '../model/Post'
 import Link from '../model/Link'
+import UserCollect from '../model/UserCollect'
 import fs from 'fs'
 import { v4 as uuid } from 'uuid'
 import moment from 'moment'
@@ -63,12 +64,31 @@ class ContentController {
   // 文章详情接口
   async getPostDetail (ctx) {
     const id = ctx.query.tid
+    const params = ctx.query
     if (id !== 'undefined' && id !== '') {
       const result = await Post.findOne({ _id: id }).populate({
         path: 'uid',
         select: 'name isVip pic'
       })
       const obj = rename(result.toJSON(), 'uid', 'user')
+      let isFav = 0
+      // 判断用户是否传递Authorization的数据，即是否登录
+      if (
+        typeof ctx.header.authorization !== 'undefined' &&
+      ctx.header.authorization !== ''
+      ) {
+        const obj = await getJWTPayload(ctx.header.authorization)
+        const userCollect = await UserCollect.findOne({
+          uid: obj._id,
+          tid: params.tid
+        })
+        console.log(userCollect, 987978)
+        if (userCollect && userCollect.tid) {
+          isFav = 1
+        }
+      }
+      // const newPost = result.toJSON()
+      obj.isFav = isFav
       const res = await Post.updateOne({ _id: id }, { $inc: { reads: 1 } })
       if (res.ok === 1 && obj._id) {
         ctx.body = {
@@ -196,6 +216,49 @@ class ContentController {
         code: 200,
         msg: '发表成功',
         data: result
+      }
+    } else {
+      // 图片验证码失败
+      ctx.body = {
+        code: 500,
+        msg: '图片验证码验证失败'
+      }
+    }
+  }
+
+  // 编辑帖子
+  async editPost (ctx) {
+    const { body } = ctx.request
+    const sid = body.sid
+    const code = body.code
+    // 验证图片验证码的时效性、正确性
+    const result = await checkCode(sid, code)
+    if (result) {
+      const obj = await getJWTPayload(ctx.header.authorization)
+      const post = await Post.findOne({ _id: body.tid })
+      // 判断是否是楼主 是否结贴
+      console.log(post, 555)
+      console.log(obj._id, 666)
+      if (obj._id === post.uid && !post.isEnd) {
+        const result = await Post.updateOne({ _id: body.tid }, body)
+        console.log(result, 888)
+        if (result.ok === 1) {
+          ctx.body = {
+            code: 200,
+            msg: '更新成功',
+            data: result
+          }
+        } else {
+          ctx.body = {
+            code: 500,
+            msg: '更新失败'
+          }
+        }
+      } else {
+        ctx.body = {
+          code: 500,
+          msg: '用户无权限！'
+        }
       }
     } else {
       // 图片验证码失败

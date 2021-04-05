@@ -16,7 +16,7 @@ class PublicController {
     // 设置超时时间10分钟
     setValue(body.sid, newCaptcha.text, 10 * 60)
     getValue(body.sid).then(() => {
-      console.log(body.sid)
+      // console.log(body.sid)
     })
     ctx.body = {
       code: 200,

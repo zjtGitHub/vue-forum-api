@@ -1,6 +1,7 @@
 import SignRecord from '../model/SignRecord'
 import { getJWTPayload } from '../common/Utils'
 import User from '../model/User'
+import UserCollect from '../model/UserCollect'
 import send from '../config/MailConfig'
 import { v4 as uuid } from 'uuid'
 import config from '@/config'
@@ -223,6 +224,59 @@ class UserController {
       ctx.body = {
         code: 500,
         msg: '更新密码失败，请重试！'
+      }
+    }
+  }
+
+  // 设置收藏
+  async setCollect (ctx) {
+    const params = ctx.query
+    const obj = await getJWTPayload(ctx.header.authorization)
+    if (parseInt(params.isFav)) {
+      // 说明用户已经收藏了帖子
+      await UserCollect.deleteOne({ uid: obj._id, tid: params.tid })
+      ctx.body = {
+        code: 200,
+        msg: '取消收藏成功'
+      }
+    } else {
+      const newCollect = new UserCollect({
+        uid: obj._id,
+        tid: params.tid,
+        title: params.title
+      })
+      const result = await newCollect.save()
+      if (result.uid) {
+        ctx.body = {
+          code: 200,
+          data: result,
+          msg: '收藏成功'
+        }
+      }
+    }
+  }
+
+  // 获取收藏列表
+  async getCollectByUid (ctx) {
+    const params = ctx.query
+    const obj = await getJWTPayload(ctx.header.authorization)
+    const result = await UserCollect.getListByUid(
+      obj._id,
+      params.page,
+      params.limit ? parseInt(params.limit) : 10
+    )
+    const total = await UserCollect.countByUid(obj._id)
+    if (result.length > 0) {
+      ctx.body = {
+        code: 200,
+        data: result,
+        total,
+        msg: '查询列表成功'
+      }
+    } else {
+      ctx.body = {
+        code: 500,
+        msg: '查询列表失败'
       }
     }
   }
