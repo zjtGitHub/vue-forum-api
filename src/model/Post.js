@@ -65,7 +65,23 @@ PostSchema.statics = {
       title: 1
     }).sort({ answer: -1 })
       .limit(15)
+  },
+
+  countList: function (options) {
+    return this.find(options).countDocuments()
+  },
+  // 根据uid获取帖子列表
+  getListByUid: function (id, page, limit) {
+    return this.find({ uid: id })
+      .skip(page * limit)
+      .limit(limit)
+      .sort({ created: -1 })
+  },
+  // 根据uid获取帖子总数
+  countByUid: function (id) {
+    return this.find({ uid: id }).countDocuments()
   }
+
 }
 
 const PostModel = mongoose.model('post', PostSchema)

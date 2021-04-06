@@ -48,6 +48,16 @@ CommentsSchema.statics = {
   },
   queryCount: function (id) {
     return this.find({ tid: id }).countDocuments()
+  },
+  getCommetsPublic: function (id, page, limit) {
+    return this.find({ cuid: id })
+      .populate({
+        path: 'tid',
+        select: '_id title'
+      })
+      .skip(page * limit)
+      .limit(limit)
+      .sort({ created: -1 })
   }
 }
 

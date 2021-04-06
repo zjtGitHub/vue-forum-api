@@ -37,6 +37,24 @@ class CommentsController {
     }
   }
 
+  // 获取用户最近的评论记录
+  async getCommentPublic (ctx) {
+    const params = ctx.query
+    const result = await Comment.getCommetsPublic(params.uid, params.page, parseInt(params.limit))
+    if (result.length > 0) {
+      ctx.body = {
+        code: 200,
+        data: result,
+        msg: '查询最近的评论记录成功'
+      }
+    } else {
+      ctx.body = {
+        code: 500,
+        msg: '查询评论记录失败！'
+      }
+    }
+  }
+
   // 添加评论
   async addComment (ctx) {
     const { body } = ctx.request
