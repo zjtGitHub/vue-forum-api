@@ -67,7 +67,14 @@ class CommentsController {
       const newComment = new Comment(body)
       const obj = await getJWTPayload(ctx.header.authorization)
       newComment.cuid = obj._id
+      const post = await Post.findOne({ _id: body.tid })
+      newComment.uid = post.uid
       const comment = await newComment.save()
+      const num = await Comment.getTotal(post.uid)
+      global.ws.send(post.uid, JSON.stringify({
+        event: 'message',
+        message: num
+      }))
       const res = await Post.updateOne({ _id: body.tid }, { $inc: { answer: 1 } })
       if (res.ok === 1 && comment._id) {
         ctx.body = {

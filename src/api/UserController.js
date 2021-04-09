@@ -1,6 +1,7 @@
 import SignRecord from '../model/SignRecord'
 import { getJWTPayload } from '../common/Utils'
 import User from '../model/User'
+import Comments from '../model/Comment'
 import UserCollect from '../model/UserCollect'
 import send from '../config/MailConfig'
 import { v4 as uuid } from 'uuid'
@@ -299,6 +300,51 @@ class UserController {
       code: 200,
       data: user,
       msg: '查询成功！'
+    }
+  }
+
+  // 获取用户未读消息
+  async getMsg (ctx) {
+    const params = ctx.query
+    const page = params.page ? params.page : 0
+    const limit = params.limit ? parseInt(params.limit) : 0
+    // 方法一： 嵌套查询 -> aggregate
+    // 方法二： 通过冗余换时间
+    const obj = await getJWTPayload(ctx.header.authorization)
+    const num = await Comments.getTotal(obj._id)
+    const result = await Comments.getMsgList(obj._id, page, limit)
+
+    ctx.body = {
+      code: 200,
+      data: result,
+      total: num
+    }
+  }
+
+  // 设置已读消息
+  async setMsg (ctx) {
+    const params = ctx.query
+    if (params.id) {
+      const result = await Comments.updateOne(
+        { _id: params.id },
+        { isRead: '1' }
+      )
+      if (result.ok === 1) {
+        ctx.body = {
+          code: 200
+        }
+      }
+    } else {
+      const obj = await getJWTPayload(ctx.header.authorization)
+      const result = await Comments.updateMany(
+        { uid: obj._id },
+        { isRead: '1' }
+      )
+      if (result.ok === 1) {
+        ctx.body = {
+          code: 200
+        }
+      }
     }
   }
 }

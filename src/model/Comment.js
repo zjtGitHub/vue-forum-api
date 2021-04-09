@@ -58,6 +58,32 @@ CommentsSchema.statics = {
       .skip(page * limit)
       .limit(limit)
       .sort({ created: -1 })
+  },
+  getTotal: function (id) {
+    return this.find({ uid: id, isRead: '0', status: '1' }).countDocuments()
+  },
+  getMsgList: function (id, page, limit) {
+    return this.find({
+      uid: id,
+      cuid: { $ne: id },
+      isRead: { $eq: '0' }, // 未读状态
+      status: { $eq: '1' } // 是否显示
+    })
+      .populate({
+        path: 'tid',
+        select: '_id title content'
+      })
+      .populate({
+        path: 'uid',
+        select: '_id name'
+      })
+      .populate({
+        path: 'cuid',
+        select: '_id name'
+      })
+      .skip(limit * page)
+      .limit(limit)
+      .sort({ created: -1 })
   }
 }
 
