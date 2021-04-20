@@ -8,6 +8,7 @@ import { v4 as uuid } from 'uuid'
 import config from '@/config'
 import jwt from 'jsonwebtoken'
 import * as moment from 'moment'
+import qs from 'qs'
 import { setValue, getValue } from '@/config/RedisConfig'
 import bcrypt from 'bcrypt'
 class UserController {
@@ -285,7 +286,8 @@ class UserController {
   // 获取用户基本信息
   async getBasicInfo (ctx) {
     const params = ctx.query
-    const uid = params.uid
+    const obj = await getJWTPayload(ctx.header.authorization)
+    const uid = params.uid || obj._id
     let user = await User.findByID(uid)
     // 取得用户的签到记录 有没有 > today 0:00:00
     user = user.toJSON()
@@ -344,6 +346,137 @@ class UserController {
         ctx.body = {
           code: 200
         }
+      }
+    }
+  }
+
+  // 获取用户列表
+  async getUsers (ctx) {
+    let params = ctx.query
+    params = qs.parse(params)
+    const page = params.page ? params.page : 0
+    const limit = params.limit ? parseInt(params.limit) : 0
+    const sort = params.sort || 'created'
+    const option = params.option || {}
+    const result = await User.getList(option, sort, page, limit)
+    const total = await User.countList(option)
+    ctx.body = {
+      code: 200,
+      data: result,
+      total: total
+    }
+  }
+
+  // 管理员删除用户
+  async deleteUserById (ctx) {
+    const { body } = ctx.request
+    // const user = await User.findOne({ _id: params.id })
+    // if (user) {
+    const result = await User.deleteMany({ _id: { $in: body.ids } })
+    ctx.body = {
+      code: 200,
+      msg: '删除成功',
+      data: result
+    }
+    // } else {
+    //   ctx.body = {
+    //     code: 500,
+    //     msg: '用户不存在或者id信息错误！'
+    //   }
+    // }
+  }
+
+  // 管理员更新用户
+  async updateUserById (ctx) {
+    const { body } = ctx.request
+
+    const user = await User.findOne({ _id: body._id })
+    // 1.校验用户是否存在 -> 用户名是否冲突
+    if (!user) {
+      ctx.body = {
+        code: 500,
+        msg: '用户不存在或者id信息错误！'
+      }
+      return
+    }
+    // if (body.username !== user.username) {
+    //   const userCheckName = await User.findOne({ username: body.username })
+    //   if (userCheckName) {
+    //     ctx.body = {
+    //       code: 501,
+    //       msg: '用户名已经存在，更新失败！'
+    //     }
+    //     return
+    //   }
+    // }
+
+    // 2.判断密码是否传递 -> 进行加密保存
+    if (body.password) {
+      body.password = await bcrypt.hash(body.password, 5)
+    }
+    const result = await User.updateOne({ _id: body._id }, body)
+    if (result.ok === 1 && result.nModified === 1) {
+      ctx.body = {
+        code: 200,
+        msg: '更新成功'
+      }
+    } else {
+      ctx.body = {
+        code: 500,
+        msg: '服务异常，更新失败'
+      }
+    }
+  }
+
+  // 批量设置用户属性
+  // 方法一：新增一个接口 方法二： options -> action 'one' 'many'
+  async updateUserBatch (ctx) {
+    const { body } = ctx.request
+    const result = await User.updateMany(
+      { _id: { $in: body.ids } },
+      { $set: { ...body.settings } }
+    )
+    ctx.body = {
+      code: 200,
+      data: result
+    }
+  }
+
+  async checkUsername (ctx) {
+    const params = ctx.query
+    const user = await User.findOne({ username: params.username })
+    // 默认是 1 - 校验通过， 0 - 校验失败
+    let result = 1
+    if (user && user.username) {
+      result = 0
+    }
+    ctx.body = {
+      code: 200,
+      data: result,
+      msg: '用户名已经存在，更新失败！'
+    }
+  }
+
+  async addUser (ctx) {
+    const { body } = ctx.request
+    body.password = await bcrypt.hash(body.password, 5)
+    const user = new User(body)
+    const result = await user.save()
+    const userObj = result.toJSON()
+    const arr = ['password']
+    arr.map(item => {
+      delete userObj[item]
+    })
+    if (result) {
+      ctx.body = {
+        code: 200,
+        data: userObj,
+        msg: '添加用户成功'
+      }
+    } else {
+      ctx.body = {
+        code: 500,
+        msg: '服务接口异常'
       }
     }
   }
