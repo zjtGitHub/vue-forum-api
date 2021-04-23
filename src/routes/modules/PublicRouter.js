@@ -28,6 +28,9 @@ router.get('/tips', contentController.getTips)
 // 本周热议
 router.get('/topWeek', contentController.getTopWeek)
 
+// 获取头条
+router.get('/getHeadlines', contentController.getHeadlines)
+
 // 确认修改邮件
 router.get('/reset-email', userController.updateUsername)
 

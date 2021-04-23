@@ -10,6 +10,7 @@ import { getJWTPayload, checkCode, rename } from '../common/Utils'
 import User from '@/model/User'
 // import { dirExists } from '@/common/Utils'
 import mkdir from 'make-dir'
+import koa2Req from 'koa2-request' // koa请求转发
 class ContentController {
   /**
    * 文章列表接口
@@ -142,6 +143,19 @@ class ContentController {
     ctx.body = {
       code: 200,
       data: result,
+      msg: 'success'
+    }
+  }
+
+  /**
+   * 前日头条
+   * @param {*} ctx
+   */
+  async getHeadlines (ctx) {
+    const result = await koa2Req('http://39.105.164.107:7001/news')
+    ctx.body = {
+      code: 200,
+      data: JSON.parse(result.body),
       msg: 'success'
     }
   }
