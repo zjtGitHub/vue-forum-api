@@ -18,7 +18,7 @@ const ws = new WebSocketServer()
 ws.init()
 global.ws = ws
 
-const isDevMode = process.env.NODE_ENV === 'production'
+const isDevMode = process.env.NODE_ENV !== 'production'
 
 // 定义公共路径,不需要jwt鉴权
 // 这两个路径不需要鉴权就可以访问
@@ -49,8 +49,11 @@ if (!isDevMode) {
   app.use(compress())
 }
 
+const port = isDevMode ? 4396 : 12005
+
 app.use(middleware)
 app.use(router())
 
-app.listen(4396)
-console.log('server running at 4396')
+app.listen(port, () => {
+  console.log(`The server is running at: ${port}`)
+})

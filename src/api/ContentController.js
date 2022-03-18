@@ -155,7 +155,7 @@ class ContentController {
     const result = await koa2Req('http://39.105.164.107:7001/news')
     ctx.body = {
       code: 200,
-      data: JSON.parse(result.body),
+      data: JSON.parse(result.body).data,
       msg: 'success'
     }
   }
