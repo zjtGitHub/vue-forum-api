@@ -50,8 +50,8 @@ class LoginController {
     if (result) {
       // 验证用户账号密码是否正确
       let checkUserPasswd = false
-      const user = await User.findByName(body.username)
-      if (await bcrypt.compare(body.password, user.password)) {
+      const user = await User.findByName(body.username) || {}
+      if (await bcrypt.compare(body.password, user.password || '')) {
         checkUserPasswd = true
       }
       // mongoDB查库
