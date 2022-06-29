@@ -1,3 +1,10 @@
+/*
+ * @Author: zhangjintong
+ * @Date: 2021-03-10 23:18:42
+ * @LastEditTime: 2022-06-29 23:37:27
+ * @LastEditors: zhangjintong
+ * @FilePath: \vue-forum-api\src\routes\modules\PublicRouter.js
+ */
 import Router from 'koa-router'
 import publicController from '@/api/PublicController'
 import contentController from '@/api/ContentController'
@@ -30,6 +37,9 @@ router.get('/topWeek', contentController.getTopWeek)
 
 // 获取头条
 router.get('/getHeadlines', contentController.getHeadlines)
+
+// 获取头条详情
+router.get('/getHeadlinesDetail', contentController.getHeadlinesDetail)
 
 // 确认修改邮件
 router.get('/reset-email', userController.updateUsername)

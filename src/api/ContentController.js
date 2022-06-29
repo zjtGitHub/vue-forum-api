@@ -160,6 +160,19 @@ class ContentController {
     }
   }
 
+  /**
+   * 前日头条详情
+   * @param {*} ctx
+   */
+  async getHeadlinesDetail (ctx) {
+    const result = await koa2Req('http://39.105.164.107:7001/detail?id=' + ctx.query.id)
+    ctx.body = {
+      code: 200,
+      data: JSON.parse(result.body).data,
+      msg: 'success'
+    }
+  }
+
   // 上传图片
   async uploadImg (ctx) {
     // console.log(ctx.request.files)
